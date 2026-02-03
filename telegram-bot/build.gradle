@@ -1,0 +1,83 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'jacoco'
+}
+
+group = "training"
+version = "1.0"
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+application {
+    mainClass = "com.stepanio.java.training.telegram.app.Main"
+}
+
+dependencies {
+    testImplementation platform("org.junit:junit-bom:5.10.2")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+
+    testImplementation "org.mockito:mockito-core:5.11.0"
+    testImplementation "org.mockito:mockito-junit-jupiter:5.11.0"
+
+    implementation 'org.telegram:telegrambots-longpolling:8.0.0'
+    implementation 'org.telegram:telegrambots-client:8.0.0'
+
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    runtimeOnly 'ch.qos.logback:logback-classic:1.4.11'
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.8
+            }
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ["src/main/resources"]
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+        resources {
+            srcDirs = ["src/test/resources"]
+        }
+    }
+}
