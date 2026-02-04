@@ -1,5 +1,6 @@
-import com.stepanio.java.training.telegram.app.command.CommandDispatcher;
-import com.stepanio.java.training.telegram.app.command.commands.BotCommand;
+import com.stepanio.java.training.telegram.app.command.dispatcher.CommandDispatcher;
+import com.stepanio.java.training.telegram.app.command.BotCommand;
+import com.stepanio.java.training.telegram.app.dto.CommandResponse;
 import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
 import org.junit.jupiter.api.Test;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -22,7 +23,7 @@ public class CommandDispatcherTest {
 
         when(startCommand.supports(incomingMessageDto)).thenReturn(false);
         when(otherCommand.supports(incomingMessageDto)).thenReturn(false);
-        when(defaultCommand.handle(incomingMessageDto)).thenReturn(new SendMessage("123", "default"));
+        when(defaultCommand.handle(incomingMessageDto)).thenReturn(new CommandResponse(123L, "default"));
 
         CommandDispatcher commandDispatcher = new CommandDispatcher(List.of(startCommand, otherCommand), defaultCommand);
         commandDispatcher.dispatch(incomingMessageDto);
