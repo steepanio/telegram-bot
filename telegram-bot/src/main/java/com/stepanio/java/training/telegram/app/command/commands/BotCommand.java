@@ -1,4 +1,4 @@
-package com.stepanio.java.training.telegram.app.command;
+package com.stepanio.java.training.telegram.app.command.commands;
 
 import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
