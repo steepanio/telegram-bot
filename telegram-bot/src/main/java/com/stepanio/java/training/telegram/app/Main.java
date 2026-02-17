@@ -1,5 +1,6 @@
 package com.stepanio.java.training.telegram.app;
 
+import com.stepanio.java.training.telegram.app.app.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,5 +16,8 @@ public class Main {
         } else {
             log.info("Token loaded");
         }
+
+        Application app = new Application();
+        app.run();
     }
 }
