@@ -6,14 +6,12 @@ import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
 public class MenuCommand implements BotCommand {
     @Override
     public boolean supports(IncomingMessageDto incomingMessageDto) {
-        return incomingMessageDto.getCommandName().equals("/menu");
+        return incomingMessageDto.getCommandName().equals(BotCommandConstants.MENU_COMMAND);
     }
 
     @Override
     public CommandResponse handle(IncomingMessageDto incomingMessageDto) {
         long chatId = incomingMessageDto.getChatId();
-        String text = "";
-
-        return new CommandResponse(chatId, text);
+        return new CommandResponse(chatId, BotCommandConstants.MENU_COMMAND_RESPONSE);
     }
 }

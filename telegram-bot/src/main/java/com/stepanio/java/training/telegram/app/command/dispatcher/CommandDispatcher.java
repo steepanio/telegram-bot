@@ -8,15 +8,15 @@ import java.util.List;
 
 public class CommandDispatcher {
     private final List<BotCommand> commands;
-    private final BotCommand defaultCommand;
+    private final BotCommand unknownCommand;
 
-    public CommandDispatcher(List<BotCommand> commands, BotCommand defaultCommand) {
+    public CommandDispatcher(List<BotCommand> commands, BotCommand unknownCommand) {
         this.commands = commands;
-        this.defaultCommand = defaultCommand;
+        this.unknownCommand = unknownCommand;
     }
 
     public CommandResponse dispatch(IncomingMessageDto incomingMessageDto) {
         return commands.stream().filter(botCommand -> botCommand.supports(incomingMessageDto))
-                .findFirst().map(botCommand -> botCommand.handle(incomingMessageDto)).orElse(defaultCommand.handle(incomingMessageDto));
+                .findFirst().orElse(unknownCommand).handle(incomingMessageDto);
     }
 }

@@ -8,14 +8,12 @@ public class StartCommand implements BotCommand {
 
     @Override
     public boolean supports(IncomingMessageDto incomingMessageDto) {
-        return incomingMessageDto.getCommandName().equals("/start");
+        return incomingMessageDto.getCommandName().equals(BotCommandConstants.START_COMMAND);
     }
 
     @Override
     public CommandResponse handle(IncomingMessageDto incomingMessageDto) {
         long chatId = incomingMessageDto.getChatId();
-        String text = "";
-
-        return new CommandResponse(chatId, text);
+        return new CommandResponse(chatId, BotCommandConstants.START_COMMAND_RESPONSE);
     }
 }

@@ -6,14 +6,12 @@ import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
 public class ReadyCommand implements BotCommand {
     @Override
     public boolean supports(IncomingMessageDto incomingMessageDto) {
-        return incomingMessageDto.getCommandName().equals("/ready");
+        return incomingMessageDto.getCommandName().equals(BotCommandConstants.READY_COMMAND);
     }
 
     @Override
     public CommandResponse handle(IncomingMessageDto incomingMessageDto) {
         long chatId = incomingMessageDto.getChatId();
-        String text = "";
-
-        return new CommandResponse(chatId, text);
+        return new CommandResponse(chatId, BotCommandConstants.READY_COMMAND_RESPONSE);
     }
 }
