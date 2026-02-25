@@ -7,14 +7,12 @@ public class ExperienceCommand implements BotCommand {
 
     @Override
     public boolean supports(IncomingMessageDto incomingMessageDto) {
-        return incomingMessageDto.getCommandName().equals("/experience");
+        return incomingMessageDto.getCommandName().equals(BotCommandConstants.EXPERIENCE_COMMAND);
     }
 
     @Override
     public CommandResponse handle(IncomingMessageDto incomingMessageDto) {
         long chatId = incomingMessageDto.getChatId();
-        String text = "";
-
-        return new CommandResponse(chatId, text);
+        return new CommandResponse(chatId, BotCommandConstants.EXPERIENCE_COMMAND_RESPONSE);
     }
 }

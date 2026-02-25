@@ -6,14 +6,12 @@ import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
 public class RegionCommand implements BotCommand {
     @Override
     public boolean supports(IncomingMessageDto incomingMessageDto) {
-        return incomingMessageDto.getCommandName().equals("/region");
+        return incomingMessageDto.getCommandName().equals(BotCommandConstants.REGION_COMMAND);
     }
 
     @Override
     public CommandResponse handle(IncomingMessageDto incomingMessageDto) {
         long chatId = incomingMessageDto.getChatId();
-        String text = "";
-
-        return new CommandResponse(chatId, text);
+        return new CommandResponse(chatId, BotCommandConstants.REGION_COMMAND_RESPONSE);
     }
 }
