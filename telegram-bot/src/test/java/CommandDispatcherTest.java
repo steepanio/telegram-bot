@@ -1,9 +1,8 @@
-import com.stepanio.java.training.telegram.app.command.dispatcher.CommandDispatcher;
 import com.stepanio.java.training.telegram.app.command.BotCommand;
+import com.stepanio.java.training.telegram.app.command.dispatcher.CommandDispatcher;
 import com.stepanio.java.training.telegram.app.dto.CommandResponse;
 import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
 import org.junit.jupiter.api.Test;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.util.List;
 

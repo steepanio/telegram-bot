@@ -15,25 +15,27 @@ public class JsonUserRepository implements UserRepository {
     private final File usersDirectory = new File("users");
     private final ObjectMapper mapper;
 
-    public JsonUserRepository(ObjectMapper mapper) {
+    public JsonUserRepository(ObjectMapper mapper, File usersDirectory) {
         this.mapper = mapper;
         if (!this.usersDirectory.exists()) {
-            throw new RuntimeException("Папка с пользователями не создана");
+            boolean created = this.usersDirectory.mkdirs();
+            if (!created) {
+                throw new RuntimeException("Папка с пользователями не создана");
+            }
         }
-        this.usersDirectory.mkdirs();
     }
 
     @Override
-    public Optional<BotUserDto> findById(Long id) {
-        return Optional.of(id)
+    public Optional<BotUserDto> findById(Long userId) {
+        return Optional.of(userId)
                 .filter(this::exists)
                 .map(this::getUserFile)
                 .map(this::readUserFile);
     }
 
     @Override
-    public boolean exists(Long id) {
-        return getUserFile(id).exists();
+    public boolean exists(Long userId) {
+        return getUserFile(userId).exists();
     }
 
     @Override
@@ -43,8 +45,8 @@ public class JsonUserRepository implements UserRepository {
     }
 
     @Override
-    public void delete(Long id) {
-        File userFile = getUserFile(id);
+    public void delete(Long userId) {
+        File userFile = getUserFile(userId);
         if (userFile.exists()) {
             boolean delete = userFile.delete();
             if (!delete) {
