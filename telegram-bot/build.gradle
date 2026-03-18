@@ -8,6 +8,7 @@ group = "training"
 version = "1.0"
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -42,6 +43,10 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 
     implementation 'org.json:json:20230227'
+
+
+    implementation 'ru.stepan.trudvsem:trud-vsem-rest-api-client:1.0.0'
+
 }
 
 test {

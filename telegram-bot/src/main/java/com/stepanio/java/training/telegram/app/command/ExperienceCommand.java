@@ -3,6 +3,8 @@ package com.stepanio.java.training.telegram.app.command;
 import com.stepanio.java.training.telegram.app.dto.CommandResponse;
 import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
 
+import java.util.List;
+
 public class ExperienceCommand implements BotCommand {
 
     @Override
@@ -13,6 +15,6 @@ public class ExperienceCommand implements BotCommand {
     @Override
     public CommandResponse handle(IncomingMessageDto incomingMessageDto) {
         long chatId = incomingMessageDto.getChatId();
-        return new CommandResponse(chatId, BotCommandConstants.EXPERIENCE_COMMAND_RESPONSE);
+        return new CommandResponse(chatId, "");
     }
 }

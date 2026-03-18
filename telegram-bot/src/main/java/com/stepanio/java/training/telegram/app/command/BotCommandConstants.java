@@ -15,7 +15,7 @@ public class BotCommandConstants {
     public static final String SALARY_COMMAND = "/salary";
     public static final String START_COMMAND = "/start";
     public static final String STOP_COMMAND = "/stop";
-    public static final String TIMEZONE_COMMAND = "/timezone";
+    public static final String TIMEZONE_COMMAND = "UTC([+-]\\\\d{1,2}(:\\\\d{2})?)?";
 
     public static final String EXPERIENCE_COMMAND_RESPONSE = "";
     public static final String KEYWORD_COMMAND_RESPONSE = "";
