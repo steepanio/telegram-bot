@@ -14,15 +14,14 @@ public class RegionCommand implements BotCommand {
 
     @Override
     public boolean supports(IncomingMessageDto incomingMessageDto) {
-        return incomingMessageDto.getCommandName().equals(BotCommandConstants.REGION_COMMAND);
+        return BotCommandConstants.REGION_COMMAND.equals(incomingMessageDto.getCommandName());
     }
 
     @Override
     public CommandResponse handle(IncomingMessageDto incomingMessageDto) {
-        long chatId = incomingMessageDto.getChatId();
-        BotUserDto botUserDto = repository.findById(incomingMessageDto.getUserId()).orElseThrow();
-        String experience = incomingMessageDto.getText();
-        botUserDto.getFilter().setExperience(Integer.valueOf(experience));
-        return new CommandResponse(chatId, null);
+        BotUserDto user = repository.findById(incomingMessageDto.getUserId()).orElseThrow();
+        user.getFilter().setExperience(Integer.valueOf(incomingMessageDto.getText()));
+        repository.save(user);
+        return new CommandResponse(incomingMessageDto.getChatId(), null);
     }
 }

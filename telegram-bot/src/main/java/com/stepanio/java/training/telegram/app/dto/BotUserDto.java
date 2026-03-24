@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 
 @Data
@@ -15,4 +16,6 @@ public class BotUserDto {
     private boolean active;
     private SearchFilter filter;
     private ZoneId timezone;
+    private int offset;
+    private LocalDate LastExecutionDate;
 }

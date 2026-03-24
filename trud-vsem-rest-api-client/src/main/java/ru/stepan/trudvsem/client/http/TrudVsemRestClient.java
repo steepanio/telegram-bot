@@ -25,7 +25,7 @@ public class TrudVsemRestClient {
         this.properties = properties;
     }
 
-    private VacancySearchResponse searchVacancies(VacancySearchRequest request) {
+    public VacancySearchResponse searchVacancies(VacancySearchRequest request) {
         String baseUrl = properties.getBaseUrl();
         if (isNotEmpty(request.getRegion())) {
             baseUrl = baseUrl + "/region/" + request.getRegion();
