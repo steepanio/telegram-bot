@@ -16,15 +16,17 @@ public class VacancyDto {
     private String dateModify;
     private String salary;
     @JsonProperty("salary_min")
-    private String salaryMin;
+    private int salaryMin;
     @JsonProperty("salary_max")
-    private String salaryMax;
+    private int salaryMax;
     private Region region;
     private Company company;
+    private Requirement requirement;
     @JsonProperty("vac_url")
     private String url;
     @JsonProperty("job-name")
     private String jobName;
+
 
 
     @Data
@@ -39,6 +41,12 @@ public class VacancyDto {
         @JsonProperty("region_code")
         private String regionCode;
         private String name;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Requirement {
+        private int experience;
     }
 }
 

@@ -21,7 +21,7 @@ public class StartCommand implements BotCommand {
 
     @Override
     public boolean supports(IncomingMessageDto incomingMessageDto) {
-        return incomingMessageDto.getCommandName().equals(BotCommandConstants.START_COMMAND);
+        return BotCommandConstants.START_COMMAND.equals(incomingMessageDto.getCommandName());
     }
 
     @Override

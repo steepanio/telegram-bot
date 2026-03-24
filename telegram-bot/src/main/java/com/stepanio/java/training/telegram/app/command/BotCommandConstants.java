@@ -1,10 +1,5 @@
 package com.stepanio.java.training.telegram.app.command;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-
 public class BotCommandConstants {
     public static final String EXPERIENCE_COMMAND = "/experience";
     public static final String KEYWORD_COMMAND = "/keyword";
