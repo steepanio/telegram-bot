@@ -17,6 +17,6 @@ public class CommandDispatcher {
 
     public CommandResponse dispatch(IncomingMessageDto incomingMessageDto) {
         return commands.stream().filter(botCommand -> botCommand.supports(incomingMessageDto))
-                .findFirst().orElse(unknownCommand).handle(incomingMessageDto, );
+                .findFirst().orElse(unknownCommand).handle(incomingMessageDto);
     }
 }

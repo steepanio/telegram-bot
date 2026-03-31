@@ -29,7 +29,8 @@ public class StartCommand implements BotCommand {
         String response;
         Optional<BotUserDto> user = repository.findById(incomingMessageDto.getUserId());
         if (user.isEmpty()) {
-            repository.save(new BotUserDto(incomingMessageDto.getUserId(), incomingMessageDto.getChatId(), true, null, ZoneId.of("UTC")));
+            repository.save(new BotUserDto(incomingMessageDto.getUserId(), incomingMessageDto.getChatId(),
+                    true, null, ZoneId.of("UTC"), 0, null));
             response = "Вы успешно зарегистрировались в Vacancy Tracker Bot!\n" +
                     "Будет использован часовой пояс UTC, для изменения введите\n" +
                     "часовой пояс в формате UTC+3\n" +
@@ -42,7 +43,7 @@ public class StartCommand implements BotCommand {
                     "\n" + "Ранее заданные фильтры:\n" + getFilters(filter) + "\n" + "\n" +
                     "Введите команду /menu для получения списка команд";
         }
-        return new CommandResponse(incomingMessageDto.getChatId(), response);
+        return new CommandResponse(incomingMessageDto.getChatId(), response, null);
     }
 
     public String getFilters(SearchFilter filter) {

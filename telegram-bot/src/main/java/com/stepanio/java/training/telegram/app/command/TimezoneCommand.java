@@ -25,6 +25,6 @@ public class TimezoneCommand implements BotCommand {
         String timezone = incomingMessageDto.getText();
         user.setTimezone(ZoneId.of(timezone));
         repository.save(user);
-        return new CommandResponse(incomingMessageDto.getChatId(), "Часовой пояс установлен: " + timezone);
+        return new CommandResponse(incomingMessageDto.getChatId(), "Часовой пояс установлен: " + timezone, null);
     }
 }

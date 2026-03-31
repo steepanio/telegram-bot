@@ -6,12 +6,14 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stepanio.java.training.telegram.app.dto.BotUserDto;
 import com.stepanio.java.training.telegram.app.dto.VacancyDto;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class JsonVacancyRepository implements VacancyRepository{
     private static final String FILE_NAME_PREFIX = "vacancies_";
     private static final String FILE_NAME_SUFFIX = ".json";
@@ -49,6 +51,18 @@ public class JsonVacancyRepository implements VacancyRepository{
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void delete (Long userId) {
+        File vacanciesFile = getVacanciesFile(userId);
+        if (vacanciesFile.exists()) {
+            boolean delete = vacanciesFile.delete();
+            if (!delete) {
+                log.error("Не удалось удалить файл");
+            } else {
+                log.error("Не удалось найти файл");
+            }
         }
     }
 
