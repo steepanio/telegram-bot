@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 import java.util.concurrent.ScheduledFuture;
@@ -14,4 +15,5 @@ import java.util.concurrent.ScheduledFuture;
 public class CommandResponse {
     private Long chatId;
     private String text;
+    private InlineKeyboardMarkup markup;
 }

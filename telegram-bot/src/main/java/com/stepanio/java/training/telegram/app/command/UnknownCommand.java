@@ -13,6 +13,6 @@ public class UnknownCommand implements BotCommand {
     @Override
     public CommandResponse handle(IncomingMessageDto incomingMessageDto) {
         String text = "Неизвестная команда! Нажмите /menu для вывода списка команд";
-        return new CommandResponse(incomingMessageDto.getChatId(), text);
+        return new CommandResponse(incomingMessageDto.getChatId(), text, null);
     }
 }

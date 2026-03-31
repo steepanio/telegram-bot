@@ -14,11 +14,12 @@ import java.util.List;
 
 public class VacancyLoadTask implements IdentifiableTask {
     private final Long userId;
-
     private final JsonUserRepository jsonUserRepository;
     private final JsonVacancyRepository jsonVacancyRepository;
     private final TrudVsemRestClient trudVsemRestClient;
     private final MessageSenderImpl sender;
+    private static final int PAGE_SIZE = 100;
+    private static final String LIMIT = "30";
 
 
     public VacancyLoadTask(Long userId, JsonUserRepository jsonUserRepository, JsonVacancyRepository jsonVacancyRepository, TrudVsemRestClient trudVsemRestClient, MessageSenderImpl sender) {
@@ -38,7 +39,7 @@ public class VacancyLoadTask implements IdentifiableTask {
     public void run() {
         BotUserDto user = jsonUserRepository.findById(getId()).orElseThrow();
         if (wasTaskDoneYesterday(user)) {
-            user.setOffset(user.getOffset() + 10);
+            user.setOffset(user.getOffset() + PAGE_SIZE);
         } else {
             user.setOffset(0);
         }
@@ -46,7 +47,7 @@ public class VacancyLoadTask implements IdentifiableTask {
         vacancySearchRequest.setRegion(user.getFilter().getRegion());
         vacancySearchRequest.setOffset(String.valueOf(user.getFilter().getOffset()));
         vacancySearchRequest.setText(user.getFilter().getKeyword());
-        vacancySearchRequest.setLimit("30");
+        vacancySearchRequest.setLimit(LIMIT);
         vacancySearchRequest.setExperience(String.valueOf(user.getFilter().getExperience()));
 
         VacancySearchResponse response = trudVsemRestClient.searchVacancies(vacancySearchRequest);
@@ -73,11 +74,15 @@ public class VacancyLoadTask implements IdentifiableTask {
             }
             sender.sendText(user.getChatId(), message.toString());
         }
+        user.setLastExecutionDate(LocalDate.now());
+        jsonUserRepository.save(user);
     }
 
     private boolean wasTaskDoneYesterday(BotUserDto user) {
-        LocalDate yesterday = user.getLastExecutionDate().minusDays(1);
-        return user.getLastExecutionDate() != null && user.getLastExecutionDate().equals(yesterday);
+        if (user.getLastExecutionDate() == null) {
+            return false;
+        }
+        return user.getLastExecutionDate().equals(LocalDate.now().minusDays(1));
     }
 }
 

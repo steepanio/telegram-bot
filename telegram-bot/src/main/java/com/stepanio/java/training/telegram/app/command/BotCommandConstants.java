@@ -12,17 +12,18 @@ public class BotCommandConstants {
     public static final String STOP_COMMAND = "/stop";
     public static final String TIMEZONE_COMMAND = "UTC([+-]\\\\d{1,2}(:\\\\d{2})?)?";
 
-    public static final String EXPERIENCE_COMMAND_RESPONSE = "";
-    public static final String KEYWORD_COMMAND_RESPONSE = "";
-    public static final String MENU_COMMAND_RESPONSE = "";
-    public static final String NOTIFY_COMMAND_RESPONSE = "";
-    public static final String READY_COMMAND_RESPONSE = "";
-    public static final String REGION_COMMAND_RESPONSE = "";
-    public static final String SALARY_COMMAND_RESPONSE = "";
+
     public static final String STOP_COMMAND_RESPONSE = "";
-    public static final String START_COMMAND_RESPONSE = "";
-    public static final String TIMEZONE_COMMAND_RESPONSE = "";
-    public static final String UNKNOWN_COMMAND_RESPONSE = "";
+    public static final String REGION_CALLBACK_DATA = "region";
+    public static final String MENU_CALLBACK_DATA = "menu";
+    public static final String EXPERIENCE_CALLBACK_DATA = "experience";
+    public static final String SALARY_CALLBACK_DATA = "salary";
+    public static final String KEYWORD_CALLBACK_DATA = "keyword";
+    public static final String NOTIFICATION_CALLBACK_DATA = "notification";
+    public static final String READY_CALLBACK_DATA = "ready";
+
+
+
 
 
 }
