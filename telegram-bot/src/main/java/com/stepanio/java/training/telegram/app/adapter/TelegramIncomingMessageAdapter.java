@@ -21,6 +21,7 @@ public class TelegramIncomingMessageAdapter {
 
             incomingMessageDTO.setUserId(callbackQuery.getFrom().getId());
             incomingMessageDTO.setChatId(callbackQuery.getMessage().getChatId());
+            incomingMessageDTO.setMessageId(callbackQuery.getMessage().getMessageId());
             incomingMessageDTO.setCallback(true);
             incomingMessageDTO.setCallbackData(callbackQuery.getData());
             incomingMessageDTO.setText(null);
@@ -32,6 +33,7 @@ public class TelegramIncomingMessageAdapter {
             CommandLineDto commandLine = commandLineParser.parse(text);
             incomingMessageDTO.setUserId(message.getFrom().getId());
             incomingMessageDTO.setChatId(message.getChatId());
+            incomingMessageDTO.setMessageId(message.getMessageId());
             incomingMessageDTO.setCommandName(commandLine.getCommandName());
             incomingMessageDTO.setArguments(commandLine.getArguments());
             incomingMessageDTO.setText(text);

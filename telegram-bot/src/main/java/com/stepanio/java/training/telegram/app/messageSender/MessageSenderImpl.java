@@ -1,6 +1,8 @@
 package com.stepanio.java.training.telegram.app.messageSender;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
@@ -12,10 +14,12 @@ public class MessageSenderImpl implements MessageSender {
     }
 
     @Override
-    public void sendText(long chatId, String text) {
+    public void sendText(long chatId, String text, InlineKeyboardMarkup markup) {
         SendMessage message = SendMessage.builder()
                 .chatId(String.valueOf(chatId))
                 .text(text)
+                .replyMarkup(markup)
+                .parseMode("HTML")
                 .build();
 
         try {
@@ -24,4 +28,23 @@ public class MessageSenderImpl implements MessageSender {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void editMessage(long chatId, int messageId, String text, InlineKeyboardMarkup keyboard) {
+        EditMessageText editMessage = EditMessageText.builder()
+                .chatId(chatId)
+                .messageId(messageId)
+                .text(text)
+                .parseMode("HTML")
+                .replyMarkup(keyboard)
+                .build();
+
+        try {
+            telegramClient.execute(editMessage);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

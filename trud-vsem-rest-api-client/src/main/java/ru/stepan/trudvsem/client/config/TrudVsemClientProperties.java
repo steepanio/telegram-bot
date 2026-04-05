@@ -14,7 +14,5 @@ public class TrudVsemClientProperties {
     private TrudVsemClientProperties() {
         ResourceBundle bundle = ResourceBundle.getBundle("trudvsem.properties");
         this.baseUrl = bundle.getString("trudvsem.base-url");
-
-
     }
 }

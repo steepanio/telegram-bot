@@ -13,7 +13,6 @@ public class BotCommandConstants {
     public static final String TIMEZONE_COMMAND = "UTC([+-]\\\\d{1,2}(:\\\\d{2})?)?";
 
 
-    public static final String STOP_COMMAND_RESPONSE = "";
     public static final String REGION_CALLBACK_DATA = "region";
     public static final String MENU_CALLBACK_DATA = "menu";
     public static final String EXPERIENCE_CALLBACK_DATA = "experience";
