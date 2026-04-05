@@ -12,6 +12,7 @@ import java.util.List;
 public class IncomingMessageDto {
     private long userId;
     private long chatId;
+    private Integer messageId;
     private String text;
     private String commandName;
     private List<String> arguments;

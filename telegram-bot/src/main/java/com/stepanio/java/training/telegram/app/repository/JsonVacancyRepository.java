@@ -20,7 +20,7 @@ public class JsonVacancyRepository implements VacancyRepository{
     private final File vacanciesDirectory = new File("vacancies");
     private final ObjectMapper mapper;
 
-    public JsonVacancyRepository(ObjectMapper mapper, File usersDirectory) {
+    public JsonVacancyRepository(ObjectMapper mapper, File vacanciesDirectory) {
         this.mapper = mapper;
         if (!this.vacanciesDirectory.exists()) {
             boolean created = this.vacanciesDirectory.mkdirs();

@@ -54,7 +54,8 @@ public class ReadyCommand implements BotCommand {
                 jsonUserRepository,
                 jsonVacancyRepository,
                 trudVsemRestClient,
-                sender
+                sender,
+                incomingMessageDto
         );
 
         taskScheduler.scheduleOrReplace(notificationTime, task);

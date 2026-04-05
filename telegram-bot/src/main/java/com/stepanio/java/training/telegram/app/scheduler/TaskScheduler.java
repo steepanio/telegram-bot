@@ -1,9 +1,6 @@
 package com.stepanio.java.training.telegram.app.scheduler;
 
 import com.stepanio.java.training.telegram.app.scheduler.task.IdentifiableTask;
-package com.stepanio.java.training.telegram.app.scheduler;
-
-import com.stepanio.java.training.telegram.app.scheduler.task.IdentifiableTask;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -15,7 +12,6 @@ public class TaskScheduler {
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(5);
 
-    // 👉 храним задачи по userId
     private final Map<Long, ScheduledFuture<?>> tasks = new ConcurrentHashMap<>();
 
 
