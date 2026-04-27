@@ -1,4 +1,5 @@
-import com.stepanio.java.training.telegram.app.adapter.TelegramIncomingMessageAdapter;
+package com.stepanio.java.training.telegram.app.adapter;
+
 import com.stepanio.java.training.telegram.app.command.parser.CommandLineParser;
 import com.stepanio.java.training.telegram.app.dto.CommandLineDto;
 import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -30,6 +32,9 @@ public class TelegramIncomingMessageAdapterTest {
 
     @Mock
     private Message message;
+
+    @Mock
+    private CallbackQuery callbackQuery;
 
     private TelegramIncomingMessageAdapter telegramIncomingMessageAdapter;
 
@@ -79,5 +84,29 @@ public class TelegramIncomingMessageAdapterTest {
         IncomingMessageDto result = telegramIncomingMessageAdapter.map(update);
 
         assertEquals("", result.getText());
+    }
+
+    @Test
+    void mapTestWithCallback () {
+        when(update.hasCallbackQuery()).thenReturn(true);
+        when(update.getCallbackQuery()).thenReturn(callbackQuery);
+        when(callbackQuery.getFrom()).thenReturn(user);
+        when(user.getId()).thenReturn(123L);
+        when(callbackQuery.getMessage()).thenReturn(message);
+        when(message.getChatId()).thenReturn(456L);
+        when(message.getMessageId()).thenReturn(789);
+
+        when(callbackQuery.getData()).thenReturn("some_data");
+
+        IncomingMessageDto result = telegramIncomingMessageAdapter.map(update);
+
+        assertTrue(result.isCallback());
+        assertEquals("some_data", result.getCallbackData());
+        assertNull(result.getText());
+
+        assertEquals(123L, result.getUserId());
+        assertEquals(456L, result.getChatId());
+        assertEquals(789, result.getMessageId());
+
     }
 }

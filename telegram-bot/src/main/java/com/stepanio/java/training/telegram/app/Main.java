@@ -10,9 +10,8 @@ import com.stepanio.java.training.telegram.app.messageSender.MessageSenderImpl;
 import com.stepanio.java.training.telegram.app.repository.CsvRegionsRepository;
 import com.stepanio.java.training.telegram.app.repository.JsonUserRepository;
 import com.stepanio.java.training.telegram.app.repository.JsonVacancyRepository;
+import com.stepanio.java.training.telegram.app.repository.RepositoryService;
 import com.stepanio.java.training.telegram.app.scheduler.TaskScheduler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -30,9 +29,9 @@ public class Main {
         File usersDirectory = new File("data/users");
         File vacanciesDirectory = new File("data/vacancies");
         ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
         HttpClient httpClient = HttpClient.newHttpClient();
-        TrudVsemClientProperties properties = new TrudVsemClientProperties("");
-
+        TrudVsemClientProperties properties = new TrudVsemClientProperties("trudvsem.properties");
 
         String botToken = System.getenv("BOT_TOKEN");
         if (botToken == null || botToken.isBlank()) {
@@ -44,29 +43,28 @@ public class Main {
         TelegramBotsLongPollingApplication telegramApp =
                 new TelegramBotsLongPollingApplication();
 
-
         CommandLineParser parser = new CommandLineParser();
         TelegramIncomingMessageAdapter adapter = new TelegramIncomingMessageAdapter(parser);
 
-
         JsonUserRepository jsonUserRepository = new JsonUserRepository(mapper, usersDirectory);
         JsonVacancyRepository jsonVacancyRepository = new JsonVacancyRepository(mapper, vacanciesDirectory);
+        RepositoryService repositoryService = new RepositoryService(jsonUserRepository, jsonVacancyRepository);
         CsvRegionsRepository csvRegionsRepository = new CsvRegionsRepository();
         TrudVsemRestClient trudClient = new TrudVsemRestClient(httpClient, mapper, properties);
         TaskScheduler scheduler = new TaskScheduler();
-
+        BotCommandHelper helper = new BotCommandHelper();
 
         List<BotCommand> commands = List.of(
-                new StartCommand(jsonUserRepository),
-                new StopCommand(jsonUserRepository, jsonVacancyRepository, scheduler),
-                new RegionCommand(jsonUserRepository, csvRegionsRepository),
-                new ExperienceCommand(jsonUserRepository),
-                new KeywordCommand(jsonUserRepository),
-                new MenuCommand(jsonUserRepository),
-                new NotifyCommand(jsonUserRepository),
-                new ReadyCommand(jsonUserRepository, jsonVacancyRepository, trudClient, sender, scheduler),
-                new TimezoneCommand(jsonUserRepository),
-                new SalaryCommand(jsonUserRepository)
+                new StartCommand(repositoryService),
+                new StopCommand(scheduler, repositoryService),
+                new RegionCommand(csvRegionsRepository, helper, repositoryService),
+                new ExperienceCommand(helper, repositoryService),
+                new KeywordCommand(helper, repositoryService),
+                new MenuCommand(helper, repositoryService),
+                new NotifyCommand(helper, repositoryService),
+                new ReadyCommand(trudClient, sender, scheduler, repositoryService),
+                new TimezoneCommand(repositoryService),
+                new SalaryCommand(helper, repositoryService)
         );
 
         CommandDispatcher dispatcher = new CommandDispatcher(
@@ -80,7 +78,6 @@ public class Main {
                 sender,
                 telegramApp, botToken
         );
-
         app.run();
     }
 }

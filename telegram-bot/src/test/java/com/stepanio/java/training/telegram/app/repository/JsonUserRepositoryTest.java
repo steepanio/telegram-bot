@@ -1,13 +1,17 @@
+package com.stepanio.java.training.telegram.app.repository;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stepanio.java.training.telegram.app.dto.BotUserDto;
-import com.stepanio.java.training.telegram.app.repository.JsonUserRepository;
-import okio.Path;
+import com.stepanio.java.training.telegram.app.dto.SearchFilter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -15,14 +19,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JsonUserRepositoryTest {
     private static JsonUserRepository repository;
-    private static Path tempDir;
+    private Path tempDir;
+    private ObjectMapper mapper = new ObjectMapper();
+
 
     @BeforeEach
-    void setUp() throws Exception {
-        tempDir = Path.get(Files.createTempDirectory("users_test"));
-        repository = new JsonUserRepository(new ObjectMapper(), tempDir.toFile());
+    void setUp() throws IOException {
+        tempDir = Files.createTempDirectory("users_test");
+        repository = new JsonUserRepository(mapper.findAndRegisterModules(), tempDir.toFile());
 
-        BotUserDto user = new BotUserDto(1234L, 4321L, true);
+        BotUserDto user = new BotUserDto(1234L, 4321L, true, new SearchFilter(), ZoneId.of("UTC+3"), 0, null);
         repository.save(user);
     }
 
@@ -55,10 +61,11 @@ public class JsonUserRepositoryTest {
 
     @Test
     void saveTest() {
-        BotUserDto botUserDto = new BotUserDto(2345L, 5432L, true);
+        BotUserDto botUserDto = new BotUserDto(2345L, 5432L, true, new SearchFilter(), ZoneId.of("UTC+3"), 0, null);
         save(botUserDto);
         Optional<BotUserDto> byId = findById(2345L);
         assertTrue(byId.isPresent());
+        deleteUser(2345L);
     }
 
     static Optional<BotUserDto> findById(long id) {

@@ -4,19 +4,22 @@ import com.stepanio.java.training.telegram.app.dto.BotUserDto;
 import com.stepanio.java.training.telegram.app.dto.CommandResponse;
 import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
 import com.stepanio.java.training.telegram.app.dto.SearchFilter;
-import com.stepanio.java.training.telegram.app.repository.JsonUserRepository;
+import com.stepanio.java.training.telegram.app.repository.RepositoryService;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
 
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class StartCommand implements BotCommand {
-    private final JsonUserRepository repository;
+    private final RepositoryService repositoryService;
 
-    public StartCommand(JsonUserRepository repository) {
-        this.repository = repository;
+    public StartCommand(RepositoryService repositoryService) {
+        this.repositoryService = repositoryService;
     }
 
     @Override
@@ -27,23 +30,32 @@ public class StartCommand implements BotCommand {
     @Override
     public CommandResponse handle(IncomingMessageDto incomingMessageDto) {
         String response;
-        Optional<BotUserDto> user = repository.findById(incomingMessageDto.getUserId());
-        if (user.isEmpty()) {
-            repository.save(new BotUserDto(incomingMessageDto.getUserId(), incomingMessageDto.getChatId(),
-                    true, null, ZoneId.of("UTC"), 0, null));
+        InlineKeyboardButton menu = new InlineKeyboardButton("Menu");
+        menu.setCallbackData(BotCommandConstants.MENU_CALLBACK_DATA);
+        InlineKeyboardRow row = new InlineKeyboardRow();
+        row.add(menu);
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup(List.of(row));
+        BotUserDto user = repositoryService.getUser(incomingMessageDto.getUserId());
+        if (user == null) {
+            repositoryService.saveUser(new BotUserDto(incomingMessageDto.getUserId(), incomingMessageDto.getChatId(),
+                    true, new SearchFilter(), ZoneId.of("UTC"), 0, null));
             response = "Вы успешно зарегистрировались в Vacancy Tracker Bot!\n" +
                     "Будет использован часовой пояс UTC, для изменения введите\n" +
                     "часовой пояс в формате UTC+3\n" +
                     "Используйте команду /menu для получения списка команд";
         } else {
-            SearchFilter filter = user.map(BotUserDto::getFilter).orElseThrow();
+            SearchFilter filter = user.getFilter();
+            if (filter == null) {
+                user.setFilter(new SearchFilter());
+                filter = user.getFilter();
+            }
             response = "Vacancy Tracker Bot приветствует вас!\n" +
                     "Вы ранее регистрировались в нашем боте, можете приступать к\nего использованию.\n" +
                     "Сейчас используется часовой пояс UTC, для изменения введите,\nнапример UTC+3:30\n" +
                     "\n" + "Ранее заданные фильтры:\n" + getFilters(filter) + "\n" + "\n" +
                     "Введите команду /menu для получения списка команд";
         }
-        return new CommandResponse(incomingMessageDto.getChatId(), response, null);
+        return new CommandResponse(incomingMessageDto.getChatId(), response, markup);
     }
 
     public String getFilters(SearchFilter filter) {

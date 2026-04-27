@@ -1,7 +1,6 @@
 package com.stepanio.java.training.telegram.app.command.parser;
 
 import com.stepanio.java.training.telegram.app.dto.CommandLineDto;
-import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
 
 import java.util.Arrays;
 import java.util.Collections;

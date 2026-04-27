@@ -2,6 +2,10 @@ package com.stepanio.java.training.telegram.app.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stepanio.java.training.telegram.app.dto.BotUserDto;
+import com.stepanio.java.training.telegram.app.exception.CreateDirectoryException;
+import com.stepanio.java.training.telegram.app.exception.DeleteFileException;
+import com.stepanio.java.training.telegram.app.exception.ReadFileException;
+import com.stepanio.java.training.telegram.app.exception.WriteFileException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -20,7 +24,7 @@ public class JsonUserRepository implements UserRepository {
         if (!this.usersDirectory.exists()) {
             boolean created = this.usersDirectory.mkdirs();
             if (!created) {
-                throw new RuntimeException("Папка с пользователями не создана");
+                throw new CreateDirectoryException("Папка с пользователями не создана");
             }
         }
     }
@@ -50,10 +54,10 @@ public class JsonUserRepository implements UserRepository {
         if (userFile.exists()) {
             boolean delete = userFile.delete();
             if (!delete) {
-                log.error("Не удалось удалить файл");
+                throw new DeleteFileException("Не удалось удалить файл");
             }
         } else {
-            log.error("Не удалось найти файл");
+            throw new ReadFileException("Не удалось прочитать файл");
         }
     }
 
@@ -65,7 +69,7 @@ public class JsonUserRepository implements UserRepository {
         try {
             return mapper.readValue(userFile, BotUserDto.class);
         } catch (IOException e) {
-            throw new RuntimeException("Не удалось прочитать файл пользователя");
+            throw new ReadFileException("Не удалось прочитать файл пользователя");
         }
     }
 
@@ -73,7 +77,7 @@ public class JsonUserRepository implements UserRepository {
         try {
             mapper.writerWithDefaultPrettyPrinter().writeValue(userFile, userDto);
         } catch (IOException e) {
-            throw new RuntimeException("Не удалось создать файл пользователя");
+            throw new WriteFileException("Не удалось создать файл пользователя");
         }
     }
 

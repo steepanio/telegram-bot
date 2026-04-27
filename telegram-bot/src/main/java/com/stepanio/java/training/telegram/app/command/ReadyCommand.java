@@ -5,8 +5,7 @@ import com.stepanio.java.training.telegram.app.dto.CommandResponse;
 import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
 import com.stepanio.java.training.telegram.app.dto.SearchFilter;
 import com.stepanio.java.training.telegram.app.messageSender.MessageSenderImpl;
-import com.stepanio.java.training.telegram.app.repository.JsonUserRepository;
-import com.stepanio.java.training.telegram.app.repository.JsonVacancyRepository;
+import com.stepanio.java.training.telegram.app.repository.RepositoryService;
 import com.stepanio.java.training.telegram.app.scheduler.TaskScheduler;
 import com.stepanio.java.training.telegram.app.scheduler.task.VacancyLoadTask;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -15,58 +14,62 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import ru.stepan.trudvsem.client.http.TrudVsemRestClient;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ReadyCommand implements BotCommand {
-    private final JsonUserRepository jsonUserRepository;
-    private final JsonVacancyRepository jsonVacancyRepository;
+
     private final TrudVsemRestClient trudVsemRestClient;
     private final MessageSenderImpl sender;
     private final TaskScheduler taskScheduler;
+    private final RepositoryService repositoryService;
 
-    public ReadyCommand(JsonUserRepository jsonUserRepository, JsonVacancyRepository jsonVacancyRepository, TrudVsemRestClient trudVsemRestClient, MessageSenderImpl sender, TaskScheduler taskScheduler) {
-        this.jsonUserRepository = jsonUserRepository;
-        this.jsonVacancyRepository = jsonVacancyRepository;
+    public ReadyCommand(TrudVsemRestClient trudVsemRestClient, MessageSenderImpl sender, TaskScheduler taskScheduler, RepositoryService repositoryService) {
         this.trudVsemRestClient = trudVsemRestClient;
         this.sender = sender;
         this.taskScheduler = taskScheduler;
+        this.repositoryService = repositoryService;
     }
 
 
     @Override
     public boolean supports(IncomingMessageDto incomingMessageDto) {
-        return incomingMessageDto.getCommandName().equals(BotCommandConstants.READY_COMMAND)
-                || BotCommandConstants.READY_CALLBACK_DATA.equals(incomingMessageDto.getCallbackData());
+        return BotCommandConstants.READY_COMMAND.equals(incomingMessageDto.getCommandName())
+                || incomingMessageDto.isCallback() && BotCommandConstants.READY_CALLBACK_DATA.equals(incomingMessageDto.getCallbackData());
     }
 
     @Override
     public CommandResponse handle(IncomingMessageDto incomingMessageDto) {
-        BotUserDto user = jsonUserRepository.findById(incomingMessageDto.getUserId()).orElseThrow();
-        LocalTime notificationTime = user.getFilter().getNotificationTime();
-        if (notificationTime == null) {
-            return new CommandResponse(incomingMessageDto.getChatId(), "Установите время нотификации", null);
-        }
-        VacancyLoadTask task = new VacancyLoadTask(
-                user.getUserId(),
-                jsonUserRepository,
-                jsonVacancyRepository,
-                trudVsemRestClient,
-                sender,
-                incomingMessageDto
-        );
-
-        taskScheduler.scheduleOrReplace(notificationTime, task);
+        BotUserDto user = repositoryService.getUser(incomingMessageDto.getUserId());
         SearchFilter filter = user.getFilter();
+        if (filter == null) {
+            user.setFilter(new SearchFilter());
+            filter = user.getFilter();
+        }
+        LocalTime notificationTime = filter.getNotificationTime();
+        ZoneId zoneId = user.getTimezone();
+        InlineKeyboardButton menu = new InlineKeyboardButton("Menu");
+        menu.setCallbackData(BotCommandConstants.MENU_CALLBACK_DATA);
+        InlineKeyboardRow menuRow = new InlineKeyboardRow();
+        menuRow.add(menu);
+        InlineKeyboardMarkup menuMarkup = new InlineKeyboardMarkup(List.of(menuRow));
+        if (notificationTime == null) {
+            return new CommandResponse(incomingMessageDto.getChatId(), "Установите время нотификации", menuMarkup);
+        }
+            VacancyLoadTask task = new VacancyLoadTask(
+                    user.getUserId(),
+                    trudVsemRestClient,
+                    sender, incomingMessageDto,
+                    repositoryService
+            );
+            taskScheduler.scheduleOrReplace(notificationTime, zoneId , task);
+
         String text = "Запланировано выполнение задачи \n нотификации о найденных вакансиях на " + filter.getNotificationTime() + ".\n"
                 + "Будут искаться новые вакансии по \nследующим параметрам:\n\n" + getFilters(filter);
-        InlineKeyboardButton button = new InlineKeyboardButton("Menu");
-        button.setCallbackData(BotCommandConstants.MENU_CALLBACK_DATA);
-        InlineKeyboardRow row = new InlineKeyboardRow(button);
-        InlineKeyboardMarkup markup = new InlineKeyboardMarkup(List.of(row));
-        return new CommandResponse(incomingMessageDto.getChatId(), text, markup);
+        return new CommandResponse(incomingMessageDto.getChatId(), text, menuMarkup);
     }
 
     private String getFilters(SearchFilter filter) {

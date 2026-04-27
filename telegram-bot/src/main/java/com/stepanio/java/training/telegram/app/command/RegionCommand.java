@@ -3,8 +3,10 @@ package com.stepanio.java.training.telegram.app.command;
 import com.stepanio.java.training.telegram.app.dto.BotUserDto;
 import com.stepanio.java.training.telegram.app.dto.CommandResponse;
 import com.stepanio.java.training.telegram.app.dto.IncomingMessageDto;
+import com.stepanio.java.training.telegram.app.dto.SearchFilter;
 import com.stepanio.java.training.telegram.app.repository.CsvRegionsRepository;
-import com.stepanio.java.training.telegram.app.repository.JsonUserRepository;
+import com.stepanio.java.training.telegram.app.repository.RepositoryService;
+import org.jetbrains.annotations.NotNull;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
@@ -14,53 +16,97 @@ import java.util.List;
 import java.util.Map;
 
 public class RegionCommand implements BotCommand {
-    private final JsonUserRepository userRepository;
-    private final CsvRegionsRepository regionsRepository;
     private static final String REGION_BUTTON = "region_";
-    private static final String REGION_PAGE = "region_page_";
+    private static final String REGION_PAGE = "page_region";
+    private final Map<String, String> regions;
+    private final BotCommandHelper helper;
+    private final RepositoryService repositoryService;
 
-
-    public RegionCommand(JsonUserRepository userRepository, CsvRegionsRepository regionsRepository) {
-        this.userRepository = userRepository;
-        this.regionsRepository = regionsRepository;
+    public RegionCommand(CsvRegionsRepository regionsRepository, BotCommandHelper helper, RepositoryService repositoryService) {
+        this.regions = regionsRepository.readRows("/russian_regions_codes.csv");
+        this.helper = helper;
+        this.repositoryService = repositoryService;
     }
 
     @Override
     public boolean supports(IncomingMessageDto incomingMessageDto) {
         return BotCommandConstants.REGION_COMMAND.equals(incomingMessageDto.getCommandName())
-                || BotCommandConstants.REGION_CALLBACK_DATA.equals(incomingMessageDto.getCallbackData())
+                || incomingMessageDto.isCallback()
+                && (BotCommandConstants.REGION_CALLBACK_DATA.equals(incomingMessageDto.getCallbackData())
                 || incomingMessageDto.getCallbackData().startsWith(REGION_BUTTON)
-                || incomingMessageDto.getCallbackData().startsWith(REGION_PAGE);
+                || incomingMessageDto.getCallbackData().startsWith(REGION_PAGE));
     }
 
     @Override
     public CommandResponse handle(IncomingMessageDto incomingMessageDto) {
-        BotUserDto user = userRepository.findById(incomingMessageDto.getUserId()).orElseThrow();
-
-        if (!incomingMessageDto.isCallback()) {
-            user.getFilter().setRegion((incomingMessageDto.getArguments().get(0)));
-            userRepository.save(user);
-            return new CommandResponse(incomingMessageDto.getChatId(), null, null);
+        BotUserDto user = repositoryService.getUser(incomingMessageDto.getUserId());
+        SearchFilter filter = user.getFilter();
+        if (filter == null) {
+            user.setFilter(new SearchFilter());
+            filter = user.getFilter();
         }
 
-        Map<String, String> regions = regionsRepository.readRows("/russian_regions_codes.csv");
+        InlineKeyboardButton menu = new InlineKeyboardButton("Menu");
+        menu.setCallbackData(BotCommandConstants.MENU_CALLBACK_DATA);
+        InlineKeyboardRow row = new InlineKeyboardRow();
+        row.add(menu);
+        InlineKeyboardMarkup menuMarkup = new InlineKeyboardMarkup(List.of(row));
+        List<String> arguments = incomingMessageDto.getArguments();
+
+        if (!incomingMessageDto.isCallback()) {
+            if (arguments.size() != 1) {
+                return new CommandResponse(incomingMessageDto.getChatId(),
+                        "Неправильно введены данные. Вот пример для установки фильтра: " +
+                                "/region 01", menuMarkup);
+            }
+
+            String regionArgument = arguments.get(0);
+
+            if (!regionArgument.matches("\\d{2}")) {
+                return new CommandResponse(incomingMessageDto.getChatId(),
+                        "Неправильно введены данные. Вот пример для установки фильтра: " +
+                                "/region 01", menuMarkup);
+            } else {
+                filter.setRegion(regionArgument);
+            }
+            repositoryService.saveUser(user);
+            return new CommandResponse(incomingMessageDto.getChatId(),
+                    "Задайте критерии поиска и время нотификации.\n Затем нажмите \"Готово\", либо введите команду /ready\n"
+                    , helper.getInlineKeyboardMarkup(filter));
+        }
+
         String callbackData = incomingMessageDto.getCallbackData();
         int offset = 0;
 
-        if (incomingMessageDto.isCallback()) {
-            if (incomingMessageDto.getCallbackData().startsWith(REGION_PAGE)) {
-                offset = Integer.parseInt(callbackData.replace(REGION_PAGE, ""));
-            }
+        if (incomingMessageDto.getCallbackData().startsWith(REGION_PAGE)) {
+            offset = Integer.parseInt(callbackData.replace(REGION_PAGE, ""));
+        }
 
-            if (incomingMessageDto.getCallbackData().startsWith(REGION_BUTTON)) {
-                String regionCode = callbackData.replace(REGION_BUTTON, "");
-                user.getFilter().setRegion(regionCode);
-                userRepository.save(user);
-                return new CommandResponse(incomingMessageDto.getChatId(), null, null);
-            }
+        if (incomingMessageDto.getCallbackData().startsWith(REGION_BUTTON)) {
+            String regionCode = callbackData.replace(REGION_BUTTON, "");
+            filter.setRegion(regionCode);
+            repositoryService.saveUser(user);
+            return new CommandResponse(incomingMessageDto.getChatId(),
+                    "Задайте критерии поиска и время нотификации.\n Затем нажмите \"Готово\", либо введите команду /ready\n"
+                    , helper.getInlineKeyboardMarkup(filter));
         }
 
         List<InlineKeyboardButton> buttons = createButton(regions);
+        InlineKeyboardRow paginationRow = getInlineKeyboardButtons(offset, buttons);
+
+        List<InlineKeyboardButton> onePageButtons = buttons.stream().skip(offset).limit(10).toList();
+        List<InlineKeyboardRow> rows = row(onePageButtons);
+
+        if (!paginationRow.isEmpty()) {
+            rows.add(paginationRow);
+        }
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup(rows);
+        return new CommandResponse(incomingMessageDto.getChatId(), "Выбирайте регион:", markup);
+    }
+
+    @NotNull
+    private static InlineKeyboardRow getInlineKeyboardButtons(int offset, List<InlineKeyboardButton> buttons) {
         InlineKeyboardRow paginationRow = new InlineKeyboardRow();
 
         if (offset > 0) {
@@ -74,16 +120,7 @@ public class RegionCommand implements BotCommand {
             next.setCallbackData(REGION_PAGE + (offset + 10));
             paginationRow.add(next);
         }
-
-        List<InlineKeyboardButton> onePageButtons = buttons.stream().skip(offset).limit(10).toList();
-        List<InlineKeyboardRow> rows = row(onePageButtons);
-
-        if (!paginationRow.isEmpty()) {
-            rows.add(paginationRow);
-        }
-
-        InlineKeyboardMarkup markup = new InlineKeyboardMarkup(rows);
-        return new CommandResponse(incomingMessageDto.getChatId(), "Выбирайте регион:", markup);
+        return paginationRow;
     }
 
     private List<InlineKeyboardButton> createButton(Map<String, String> map) {

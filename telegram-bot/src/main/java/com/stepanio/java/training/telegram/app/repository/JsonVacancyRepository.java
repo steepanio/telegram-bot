@@ -1,11 +1,10 @@
 package com.stepanio.java.training.telegram.app.repository;
 
-import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stepanio.java.training.telegram.app.dto.BotUserDto;
 import com.stepanio.java.training.telegram.app.dto.VacancyDto;
+import com.stepanio.java.training.telegram.app.exception.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -25,7 +24,7 @@ public class JsonVacancyRepository implements VacancyRepository{
         if (!this.vacanciesDirectory.exists()) {
             boolean created = this.vacanciesDirectory.mkdirs();
             if (!created) {
-                throw new RuntimeException("Папка с пользователями не создана");
+                throw new CreateDirectoryException("Папка с пользователями не создана");
             }
         }
     }
@@ -45,12 +44,8 @@ public class JsonVacancyRepository implements VacancyRepository{
             }
             return mapper.readValue(vacanciesFile, new TypeReference<List<VacancyDto>>() {
             });
-        } catch (StreamReadException e) {
-            throw new RuntimeException(e);
-        } catch (DatabindException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new VacanciesNotFoundException("Ошибка при чтении вакансий пользователя с id " + userId);
         }
     }
 
@@ -59,9 +54,7 @@ public class JsonVacancyRepository implements VacancyRepository{
         if (vacanciesFile.exists()) {
             boolean delete = vacanciesFile.delete();
             if (!delete) {
-                log.error("Не удалось удалить файл");
-            } else {
-                log.error("Не удалось найти файл");
+                throw new DeleteFileException("Не удалось удалить файл");
             }
         }
     }
@@ -79,7 +72,7 @@ public class JsonVacancyRepository implements VacancyRepository{
         try {
             return mapper.readValue(vacanciesFile, VacancyDto.class);
         } catch (IOException e) {
-            throw new RuntimeException("Не удалось прочитать файл");
+            throw new ReadFileException("Не удалось прочитать файл");
         }
     }
 
@@ -87,7 +80,7 @@ public class JsonVacancyRepository implements VacancyRepository{
         try {
             mapper.writerWithDefaultPrettyPrinter().writeValue(vacanciesFile, vacancyDto);
         } catch (IOException e) {
-            throw new RuntimeException("Не удалось создать файл");
+            throw new WriteFileException("Не удалось создать файл");
         }
     }
 

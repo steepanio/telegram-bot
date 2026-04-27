@@ -1,5 +1,6 @@
 package com.stepanio.java.training.telegram.app.messageSender;
 
+import com.stepanio.java.training.telegram.app.exception.SendMessageException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -25,7 +26,7 @@ public class MessageSenderImpl implements MessageSender {
         try {
             telegramClient.execute(message);
         } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
+            throw new SendMessageException("Не удалось отправить сообщение");
         }
     }
 
@@ -42,7 +43,7 @@ public class MessageSenderImpl implements MessageSender {
         try {
             telegramClient.execute(editMessage);
         } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
+            throw new SendMessageException("Не удалось отправить сообщение");
         }
     }
 
